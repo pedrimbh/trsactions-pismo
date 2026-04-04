@@ -60,15 +60,44 @@ Motivo: aderencia direta ao enunciado e previsibilidade para consumidor da API.
 
 Motivo: reduzir duplicacao e padronizar respostas.
 
-## 6. Estrategia de teste
+## 6. Estrategia de teste em camadas
 
-Foram criados testes de integracao com `SpringBootTest` para fluxos principais:
+A cobertura esta organizada por responsabilidade, sem nenhum teste redundante entre camadas:
 
-- criar e buscar conta
-- criar transacao de compra (valor negativo)
-- criar transacao de pagamento (valor positivo)
+### Camada HTTP — `AccountControllerTest`, `TransactionControllerTest`
 
-Motivo: validar comportamento de ponta a ponta (controller + service + persistencia).
+Usam `MockMvcBuilders.standaloneSetup()` com `@Mock` (Mockito):
+
+- Validam status HTTP (201, 200, 400, 404, 422)
+- Validam serializacao JSON (campos com snake_case)
+- Validam regras de `@Valid` (campos nulos, formato incorreto, valor zero)
+- Validam respostas do `ApiExceptionHandler`
+- Nao sobem contexto Spring nem banco — executam em milissegundos
+
+> Nota: `@WebMvcTest` nao esta disponivel no Spring Boot 4.x. O `standaloneSetup` cobre
+> o mesmo escopo de forma direta e sem dependencias de auto-configuracao.
+
+### Camada de servico — `AccountServiceTest`, `TransactionServiceTest`
+
+Usam `@ExtendWith(MockitoExtension.class)`:
+
+- Testam regras de negocio isoladas (normalizacao de sinal, duplicidade, tipos invalidos)
+- Repositorios sao mockados — sem banco real
+- Cobrem todos os caminhos: sucesso, excecoes esperadas, comportamento de borda
+
+### Dominio puro — `OperationTypeTest`
+
+JUnit 5 simples, sem Spring:
+
+- Testa o enum `OperationType` para todos os IDs validos e invalidos
+- Usa `@ParameterizedTest` para cobrir os tres tipos negativos (1, 2, 3)
+
+### Contexto Spring — `TrasactionsApplicationTests`
+
+Unico teste com `@SpringBootTest` que verifica que o contexto sobe sem erros.
+
+Motivo da separacao: cada camada e testada na menor granularidade possivel, mantendo
+os testes rapidos e o feedback preciso em caso de falha.
 
 ## Trade-offs
 

@@ -24,7 +24,7 @@ Regras de negocio aplicadas:
 - H2 Database (local/testes)
 - PostgreSQL (Docker)
 - Docker + Docker Compose
-- JUnit + Spring Boot Test
+- JUnit 5 + Mockito + MockMvc
 
 ## Estrutura resumida
 
@@ -62,6 +62,15 @@ docker compose down -v
 ```
 
 ### 2) Rodar testes localmente
+
+A suite possui **44 testes** organizados em camadas:
+
+| Camada | Arquivo(s) | Tipo |
+|---|---|---|
+| HTTP | `AccountControllerTest`, `TransactionControllerTest` | MockMvc (sem Spring context) |
+| Service | `AccountServiceTest`, `TransactionServiceTest` | Mockito |
+| Dominio | `OperationTypeTest` | JUnit puro |
+| Contexto | `TrasactionsApplicationTests` | @SpringBootTest |
 
 ```powershell
 Set-Location "C:\Users\Joao Pedro\Desktop\projetos_java\trasactions\trasactions"

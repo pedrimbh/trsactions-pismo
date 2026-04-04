@@ -99,6 +99,28 @@ Unico teste com `@SpringBootTest` que verifica que o contexto sobe sem erros.
 Motivo da separacao: cada camada e testada na menor granularidade possivel, mantendo
 os testes rapidos e o feedback preciso em caso de falha.
 
+## 7. Concorrencia com Virtual Threads (Project Loom)
+
+Ativado via `spring.threads.virtual.enabled=true` no `application.properties`.
+
+**Como funciona:**
+
+- Cada requisicao HTTP recebe uma **virtual thread** (gerenciada pela JVM, nao pelo SO)
+- Virtual threads sao levissimas — a JVM pode criar milhoes sem overhead significativo
+- Quando uma virtual thread bloqueia esperando o banco (JPA/JDBC), a **thread do SO e liberada** para processar outras requisicoes
+- O codigo continua identico — sem `Mono`, `Flux` ou padroes reativos
+
+**Por que nao WebFlux:**
+
+WebFlux (Spring Reactive) exigiria reescrever controllers, services e repositorios inteiros, alem de trocar JPA por R2DBC. Para o escopo deste projeto, o ganho nao justifica a complexidade. Virtual Threads entregam beneficio equivalente sem nenhuma mudanca no codigo de negocio.
+
+**HikariCP configurado junto:**
+
+Com virtual threads, milhares de requisicoes podem ser processadas simultaneamente — mas todas disputam o mesmo pool de conexoes com o banco. Sem configurar o pool, o gargalo migra de CPU/threads para conexoes ociosas.
+
+- Local (H2): pool de 5 conexoes (suficiente para desenvolvimento)
+- Docker (PostgreSQL): pool de 20 conexoes com timeouts definidos
+
 ## Trade-offs
 
 - Nao foi criado um modulo separado para `operation_types`; o enum atende bem ao escopo do desafio.

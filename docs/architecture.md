@@ -15,7 +15,7 @@ O projeto implementa uma API de contas e transacoes para o teste tecnico, com fo
 Foi adotada uma separacao clara por responsabilidade:
 
 - `api`: controllers e DTOs HTTP
-- `application`: regras de negocio
+- `service`: regras de negocio
 - `domain`: entidades e regras de dominio (enum de operacao)
 - `repository`: persistencia com Spring Data
 - `common/exception`: tratamento centralizado de erros
@@ -62,7 +62,7 @@ Motivo: reduzir duplicacao e padronizar respostas.
 
 ## 6. Estrategia de teste
 
-Foram criados testes de integracao com `MockMvc` para fluxos principais:
+Foram criados testes de integracao com `SpringBootTest` para fluxos principais:
 
 - criar e buscar conta
 - criar transacao de compra (valor negativo)
@@ -75,4 +75,5 @@ Motivo: validar comportamento de ponta a ponta (controller + service + persisten
 - Nao foi criado um modulo separado para `operation_types`; o enum atende bem ao escopo do desafio.
 - Nao foi usado mensageria/event sourcing para manter simplicidade na entrega.
 - Swagger pode ser adicionado em etapa seguinte como bonus de documentacao interativa.
+
 

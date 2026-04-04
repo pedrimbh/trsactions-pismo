@@ -1,7 +1,7 @@
-package com.pismo.trasactions.application.transaction;
+package com.pismo.trasactions.service.transaction;
 
 import com.pismo.trasactions.api.transaction.TransactionResponse;
-import com.pismo.trasactions.application.account.AccountService;
+import com.pismo.trasactions.service.account.AccountService;
 import com.pismo.trasactions.domain.account.Account;
 import com.pismo.trasactions.domain.transaction.OperationType;
 import com.pismo.trasactions.domain.transaction.Transaction;

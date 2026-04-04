@@ -1,6 +1,6 @@
 package com.pismo.trasactions.api.account;
 
-import com.pismo.trasactions.application.account.AccountService;
+import com.pismo.trasactions.service.account.AccountService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;

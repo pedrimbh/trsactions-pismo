@@ -1,6 +1,6 @@
 package com.pismo.trasactions.api.transaction;
 
-import com.pismo.trasactions.application.transaction.TransactionService;
+import com.pismo.trasactions.service.transaction.TransactionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;

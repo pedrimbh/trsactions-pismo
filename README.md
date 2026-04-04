@@ -18,16 +18,18 @@ Regras de negocio aplicadas:
 ## Tecnologias
 
 - Java 21
-- Spring Boot
+- Spring Boot 4
 - Spring Web
 - Spring Data JPA
-- H2 Database
-- JUnit + MockMvc
+- H2 Database (local/testes)
+- PostgreSQL (Docker)
+- Docker + Docker Compose
+- JUnit + Spring Boot Test
 
 ## Estrutura resumida
 
 - `api/` controllers e DTOs
-- `application/` regras de negocio
+- `service/` regras de negocio
 - `domain/` entidades e enums de dominio
 - `repository/` interfaces JPA
 - `common/exception/` tratamento centralizado de erros
@@ -36,7 +38,30 @@ Detalhes de decisoes em `docs/architecture.md`.
 
 ## Como executar
 
-### 1) Rodar testes
+### 1) Rodar com Docker (recomendado)
+
+Pre-requisito: Docker Desktop instalado e rodando.
+
+```bash
+docker compose up --build
+```
+
+Aguarde a mensagem `Started TrasactionsApplication` no log.  
+A API estara disponivel em `http://localhost:8080`.
+
+Para parar:
+
+```bash
+docker compose down
+```
+
+Para parar e apagar os dados do banco:
+
+```bash
+docker compose down -v
+```
+
+### 2) Rodar testes localmente
 
 ```powershell
 Set-Location "C:\Users\Joao Pedro\Desktop\projetos_java\trasactions\trasactions"
@@ -45,7 +70,7 @@ $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 .\mvnw.cmd test
 ```
 
-### 2) Subir a aplicacao
+### 3) Subir localmente com H2
 
 ```powershell
 Set-Location "C:\Users\Joao Pedro\Desktop\projetos_java\trasactions\trasactions"
@@ -54,7 +79,7 @@ $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 .\mvnw.cmd spring-boot:run
 ```
 
-Aplicacao sobe em `http://localhost:8080`.
+Aplicacao sobe em `http://localhost:8080` com banco H2 em memoria.
 
 ## Endpoints
 
@@ -118,10 +143,9 @@ Response (201):
 }
 ```
 
-## H2 Console
+## H2 Console (apenas local sem Docker)
 
 - URL: `http://localhost:8080/h2-console`
 - JDBC URL: `jdbc:h2:mem:trasactionsdb`
 - User: `sa`
 - Password: *(vazio)*
-

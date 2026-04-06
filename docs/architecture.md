@@ -19,6 +19,7 @@ Foi adotada uma separacao clara por responsabilidade:
 - `domain`: entidades e regras de dominio (enum de operacao)
 - `repository`: persistencia com Spring Data
 - `common/exception`: tratamento centralizado de erros
+- `common/config`: configuracao global da API (OpenApiConfig)
 
 Motivo: facilitar evolucao sem acoplamento entre transporte HTTP e regra de negocio.
 
@@ -125,6 +126,21 @@ Com virtual threads, milhares de requisicoes podem ser processadas simultaneamen
 
 - Nao foi criado um modulo separado para `operation_types`; o enum atende bem ao escopo do desafio.
 - Nao foi usado mensageria/event sourcing para manter simplicidade na entrega.
-- Swagger pode ser adicionado em etapa seguinte como bonus de documentacao interativa.
+
+## 8. Documentacao interativa com Swagger UI
+
+Integrado via `springdoc-openapi-starter-webmvc-ui`. A documentacao vive junto ao codigo:
+
+- Controllers anotados com `@Tag`, `@Operation` e `@ApiResponse` por endpoint
+- DTOs anotados com `@Schema` em todos os campos (description + example)
+- `ApiError` documentado como schema de erro padrao
+- Configuracao global em `OpenApiConfig` (titulo, versao, descricao, contato)
+
+URLs disponiveis apos subir a aplicacao:
+
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+Motivo: facilita validacao manual dos contratos e serve como documentacao viva para avaliadores.
 
 

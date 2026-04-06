@@ -1,19 +1,23 @@
-# Trasactions API
+# Transactions API
 
-API REST para o desafio de rotina de transacoes da Pismo.
+API REST para o desafio de rotina de transações da Pismo.
 
 ## Objetivo
 
 Implementar os endpoints:
 
-- `POST /accounts` - cria conta
-- `GET /accounts/{accountId}` - consulta conta
-- `POST /transactions` - cria transacao
+- `POST /accounts` — cria conta
+- `GET /accounts/{accountId}` — consulta conta
+- `POST /transactions` — cria transação
 
-Regras de negocio aplicadas:
+Regras de negócio aplicadas:
 
-- `operation_type_id` 1, 2 e 3 -> valor negativo
-- `operation_type_id` 4 -> valor positivo
+| `operation_type_id` | Operação | Sinal do valor |
+|---|---|---|
+| 1 | Compra à Vista | Negativo |
+| 2 | Compra Parcelada | Negativo |
+| 3 | Saque | Negativo |
+| 4 | Pagamento | Positivo |
 
 ## Tecnologias
 
@@ -25,29 +29,36 @@ Regras de negocio aplicadas:
 - PostgreSQL (Docker)
 - Docker + Docker Compose
 - JUnit 5 + Mockito + MockMvc
+- Springdoc OpenAPI 3 (Swagger UI)
 
 ## Estrutura resumida
 
-- `api/` controllers e DTOs
-- `service/` regras de negocio
-- `domain/` entidades e enums de dominio
-- `repository/` interfaces JPA
-- `common/exception/` tratamento centralizado de erros
+```
+api/
+  account/     → AccountController, CreateAccountRequest, AccountResponse
+  transaction/ → TransactionController, CreateTransactionRequest, TransactionResponse
+service/       → regras de negócio
+domain/        → entidades JPA e enum OperationType
+repository/    → interfaces Spring Data JPA
+common/
+  exception/   → ApiExceptionHandler, ApiError, BusinessException, ResourceNotFoundException
+  config/      → OpenApiConfig (Swagger/OpenAPI)
+```
 
-Detalhes de decisoes em `docs/architecture.md`.
+Detalhes de decisões em [`docs/architecture.md`](docs/architecture.md).
 
 ## Como executar
 
 ### 1) Rodar com Docker (recomendado)
 
-Pre-requisito: Docker Desktop instalado e rodando.
+Pré-requisito: Docker Desktop instalado e rodando.
 
 ```bash
 docker compose up --build
 ```
 
 Aguarde a mensagem `Started TrasactionsApplication` no log.  
-A API estara disponivel em `http://localhost:8080`.
+A API estará disponível em `http://localhost:8080`.
 
 Para parar:
 
@@ -69,11 +80,11 @@ A suite possui **44 testes** organizados em camadas:
 |---|---|---|
 | HTTP | `AccountControllerTest`, `TransactionControllerTest` | MockMvc (sem Spring context) |
 | Service | `AccountServiceTest`, `TransactionServiceTest` | Mockito |
-| Dominio | `OperationTypeTest` | JUnit puro |
+| Domínio | `OperationTypeTest` | JUnit puro |
 | Contexto | `TrasactionsApplicationTests` | @SpringBootTest |
 
 ```powershell
-Set-Location "C:\Users\Joao Pedro\Desktop\projetos_java\trasactions\trasactions"
+Set-Location "C:\Users\Joao Pedro\Desktop\PISMO"
 $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot"
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 .\mvnw.cmd test
@@ -82,13 +93,25 @@ $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 ### 3) Subir localmente com H2
 
 ```powershell
-Set-Location "C:\Users\Joao Pedro\Desktop\projetos_java\trasactions\trasactions"
+Set-Location "C:\Users\Joao Pedro\Desktop\PISMO"
 $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot"
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 .\mvnw.cmd spring-boot:run
 ```
 
-Aplicacao sobe em `http://localhost:8080` com banco H2 em memoria.
+Aplicação sobe em `http://localhost:8080` com banco H2 em memória.
+
+## Swagger UI
+
+A documentação interativa da API está disponível após subir a aplicação:
+
+| Recurso | URL |
+|---|---|
+| **Swagger UI (visual)** | `http://localhost:8080/swagger-ui.html` |
+| **OpenAPI JSON** | `http://localhost:8080/v3/api-docs` |
+| **OpenAPI YAML** | `http://localhost:8080/v3/api-docs.yaml` |
+
+> O Swagger UI permite testar os endpoints diretamente no browser, com exemplos de request/response e descrição de todos os campos e códigos de resposta.
 
 ## Endpoints
 
@@ -104,6 +127,18 @@ Request:
 }
 ```
 
+| Campo | Tipo | Regra |
+|---|---|---|
+| `document_number` | string | Obrigatório — exatamente 11 dígitos numéricos (CPF) |
+
+Respostas:
+
+| Código | Descrição |
+|---|---|
+| `201 Created` | Conta criada com sucesso |
+| `400 Bad Request` | Campo ausente ou formato inválido |
+| `422 Unprocessable Entity` | Regra de negócio violada |
+
 Response (201):
 
 ```json
@@ -113,9 +148,22 @@ Response (201):
 }
 ```
 
+---
+
 ### Buscar conta
 
-`GET /accounts/1`
+`GET /accounts/{accountId}`
+
+| Parâmetro | Tipo | Descrição |
+|---|---|---|
+| `accountId` | Long (path) | Identificador único da conta |
+
+Respostas:
+
+| Código | Descrição |
+|---|---|
+| `200 OK` | Conta encontrada |
+| `404 Not Found` | Conta não existe para o ID informado |
 
 Response (200):
 
@@ -126,7 +174,9 @@ Response (200):
 }
 ```
 
-### Criar transacao
+---
+
+### Criar transação
 
 `POST /transactions`
 
@@ -140,6 +190,21 @@ Request:
 }
 ```
 
+| Campo | Tipo | Regra |
+|---|---|---|
+| `account_id` | Long | Obrigatório |
+| `operation_type_id` | Integer | Obrigatório — valores válidos: 1, 2, 3 ou 4 |
+| `amount` | Decimal | Obrigatório — mínimo 0.01 (o sinal é aplicado automaticamente pelo tipo de operação) |
+
+Respostas:
+
+| Código | Descrição |
+|---|---|
+| `201 Created` | Transação criada com sucesso |
+| `400 Bad Request` | Campo ausente, valor zero ou negativo |
+| `404 Not Found` | Conta não encontrada para o `account_id` informado |
+| `422 Unprocessable Entity` | `operation_type_id` inválido (fora do intervalo 1–4) |
+
 Response (201):
 
 ```json
@@ -148,7 +213,20 @@ Response (201):
   "account_id": 1,
   "operation_type_id": 4,
   "amount": 123.45,
-  "event_date": "2026-04-04T12:00:00"
+  "event_date": "2026-04-05T12:00:00"
+}
+```
+
+---
+
+### Estrutura de erro (todas as rotas)
+
+```json
+{
+  "timestamp": "2026-04-05T10:00:00",
+  "status": 400,
+  "message": "document_number must contain exactly 11 digits",
+  "path": "/accounts"
 }
 ```
 

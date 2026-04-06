@@ -201,9 +201,8 @@ Respostas:
 | Código | Descrição |
 |---|---|
 | `201 Created` | Transação criada com sucesso |
-| `400 Bad Request` | Campo ausente, valor zero ou negativo |
+| `400 Bad Request` | Campo ausente, valor zero/negativo ou `operation_type_id` fora do intervalo 1–4 |
 | `404 Not Found` | Conta não encontrada para o `account_id` informado |
-| `422 Unprocessable Entity` | `operation_type_id` inválido (fora do intervalo 1–4) |
 
 Response (201):
 

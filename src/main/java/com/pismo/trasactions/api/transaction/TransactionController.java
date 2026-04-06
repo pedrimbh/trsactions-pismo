@@ -44,17 +44,12 @@ public class TransactionController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Dados inválidos (campo obrigatório ausente, valor zerado ou negativo)",
+                    description = "Dados inválidos: campo obrigatório ausente, valor zerado/negativo ou operation_type_id fora do intervalo 1–4",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Conta não encontrada para o account_id informado",
-                    content = @Content(schema = @Schema(implementation = ApiError.class))
-            ),
-            @ApiResponse(
-                    responseCode = "422",
-                    description = "Tipo de operação inválido (operation_type_id fora do intervalo 1–4)",
                     content = @Content(schema = @Schema(implementation = ApiError.class))
             )
     })
